@@ -4,7 +4,18 @@ import json
 from urllib.request import Request, urlopen
 import glob
 
-def scraper(page):
+NUM_OF_PAGES = 51
+URL = "https://endeavor.org/entrepreneur-companies/?_paged="
+
+def request_page_and_save_html(page_i):
+    url = URL + str(page_i)
+    print(url)
+    req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+    webpage = urlopen(req).read()
+    with open('htmls/'+str(page_i)+'.html', 'w') as file:
+        file.write(webpage.decode())
+
+def process_html_to_temp_csv(page):
     with open('htmls/' + str(page) + '.html', 'r') as html:
         html = html.read()
         bs = bs4.BeautifulSoup(html)
@@ -83,5 +94,21 @@ def scraper(page):
             except:
                 company.append('')
             companies.append(company)
-        pd.DataFrame(companies, columns=columns).to_csv('csvs/'+ str(page) + '.csv', index=False)
+        pd.DataFrame(companies, columns=columns).to_csv('temp_csvs/'+ str(page) + '.csv', index=False)
 
+def save_combined_temp_csvs():
+    csv_files = glob.glob("temp_csvs/*.csv")
+    df_list = []
+    for csv in csv_files:
+        df_list.append(pd.read_csv(csv))
+    df_combined = pd.concat(df_list)
+    df_combined.sort_values('company').reset_index(drop=True).to_csv('combined.csv')
+
+if __name__ == "__main__":
+    for i in range(1, NUM_OF_PAGES - 1):
+        request_page_and_save_html(i)
+
+    for i in range(1, NUM_OF_PAGES - 1):
+        process_html_to_temp_csv(i)
+    
+    save_combined_temp_csvs()
