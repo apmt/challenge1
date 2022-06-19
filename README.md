@@ -28,3 +28,17 @@ docker stop $(docker ps -a -q)
 docker rm $(docker ps -a -q)
 docker rmi $(docker images -q)
 ```
+
+# How to run without docker
+```
+sudo apt update
+sudo apt -y upgrade
+sudo apt install -y python3-pip
+sudo apt install -y build-essential libssl-dev libffi-dev python3-dev
+sudo apt install python-is-python3
+```
+```
+cd challenge1
+pip install -r requirements
+python main.py
+```
